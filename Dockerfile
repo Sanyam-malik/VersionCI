@@ -19,6 +19,8 @@ COPY . /app
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
+RUN mv vercli /usr/local/bin/
+
 # Set the PYTHONPATH to include the shared directory
 ENV PYTHONPATH="/app:${PYTHONPATH}"
 
