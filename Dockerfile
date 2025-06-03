@@ -22,8 +22,5 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 # Set the PYTHONPATH to include the shared directory
 ENV PYTHONPATH="/app:${PYTHONPATH}"
 
-# Copy entrypoint script
-RUN chmod +x /app/entrypoint.sh
-
 # Start flask server
 CMD ["python", "/app/main.py"]
