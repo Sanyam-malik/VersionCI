@@ -7,7 +7,7 @@ on:
 
 env:
   DOCKER_REGISTRY: sanyammalik
-  DOCKER_IMAGE: VersionCLI
+  DOCKER_IMAGE: version-cli
 
 jobs:
   version-bump:
