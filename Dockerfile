@@ -23,4 +23,4 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 ENV PYTHONPATH="/app:${PYTHONPATH}"
 
 # Start flask server
-CMD ["python", "/app/main.py"]
+CMD ["python", "main.py"]
