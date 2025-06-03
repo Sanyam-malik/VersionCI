@@ -7,7 +7,7 @@ on:
 
 env:
   DOCKER_REGISTRY: registry.local
-  DOCKER_IMAGE: mockplant
+  DOCKER_IMAGE: VersionCLI
 
 jobs:
   version-bump:
