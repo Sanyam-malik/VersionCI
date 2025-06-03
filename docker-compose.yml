@@ -1,0 +1,12 @@
+# docker-compose.yml
+version: "3.9"
+
+services:
+  versionci:
+    build:
+      context: ./
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
