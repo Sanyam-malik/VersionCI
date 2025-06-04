@@ -52,7 +52,7 @@ if ! command -v pip3 &> /dev/null; then
     echo "❌ pip3 not found. Please install Python 3 pip before running this script."
     exit 1
 fi
-pip3 install --upgrade -r "$TMP_REQ"
+pip3 install --upgrade --break-system-packages -r "$TMP_REQ"
 rm -f "$TMP_REQ"
 
 # Install selected components
