@@ -7,6 +7,13 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
+if [[ -z "$GIT_USER" || -z "$GIT_PASS" ]]; then
+    echo "❌ Please set GIT_USER and GIT_PASS environment variables for authentication."
+    exit 1
+fi
+
+AUTH_CREDENTIALS="$GIT_USER:$GIT_PASS"
+
 BASE_URL="http://forgejo.local/Neo/VersionCI/raw/branch/main"
 INSTALL_BASE="/usr/local/lib/version_ci"
 TMP_REQ="/tmp/version_ci_requirements.txt"
@@ -38,9 +45,13 @@ echo "📁 Creating base install directory: $INSTALL_BASE"
 mkdir -p "$INSTALL_BASE"
 
 echo "📥 Downloading requirements.txt..."
-curl -fsSL "$BASE_URL/requirements.txt" -o "$TMP_REQ"
+curl -fsSL -u "$AUTH_CREDENTIALS" "$BASE_URL/requirements.txt" -o "$TMP_REQ"
 
 echo "📦 Installing Python dependencies..."
+if ! command -v pip3 &> /dev/null; then
+    echo "❌ pip3 not found. Please install Python 3 pip before running this script."
+    exit 1
+fi
 pip3 install --upgrade -r "$TMP_REQ"
 rm -f "$TMP_REQ"
 
@@ -51,7 +62,7 @@ for name in "${to_install[@]}"; do
     wrapper_path="/usr/local/bin/$name"
 
     echo "📥 Downloading $script_file..."
-    curl -fsSL "$BASE_URL/$script_file" -o "$script_path"
+    curl -fsSL -u "$AUTH_CREDENTIALS" "$BASE_URL/$script_file" -o "$script_path"
     chmod +x "$script_path"
 
     echo "⚙️ Creating wrapper script at $wrapper_path..."
