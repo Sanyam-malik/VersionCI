@@ -60,13 +60,14 @@ Use the CLI inside the `vercli` container:
 
 ### Available CLI Commands
 
-| Command       | Description                                 | Example                                                      |
-| ------------- | ------------------------------------------- | ------------------------------------------------------------ |
-| `register`    | Register a new Git project                  | `register my-project https://github.com/user/repo.git`       |
-| `list`        | List all registered projects                | `list`                                                       |
-| `get-version` | Get the version for a specific branch      | `get-version my-project main`                                |
-| `set-version` | Set the version manually for a branch      | `set-version my-project main 1.0.0`                          |
-| `bump`        | Bump version for a branch with a strategy  | `bump my-project main --strategy minor`                      |
+| Command       | Description                                  | Example                                                       |
+| ------------- | -------------------------------------------- | ------------------------------------------------------------- |
+| `register`    | Register a new Git project                   | `register my-project https://github.com/user/repo.git`        |
+| `list`        | List all registered projects                 | `list`                                                        |
+| `get-version` | Get the version for a specific branch       | `get-version my-project main`                                 |
+| `set-version` | Set the version manually for a branch       | `set-version my-project main 1.0.0`                           |
+| `bump`        | Bump version for a branch with a strategy   | `bump my-project main --strategy minor`                       |
+| `remove`      | Remove a project or a branch (use `--branch` to remove a branch) | `remove my-project`<br>`remove my-project --branch dev`       |
 
 ### Bump Strategies
 
@@ -89,8 +90,8 @@ python vercli.py --api-base http://your-server:8000 register my-project https://
 ## API Examples
 
 Use any HTTP client to interact with the API (default base URL: http://localhost:8000):
-1. Register a Project
 
+1. Register a Project
 ```bash
 curl -X POST "http://localhost:8000/projects" \
 -H "Content-Type: application/json" \
@@ -111,6 +112,14 @@ curl -X PATCH "http://localhost:8000/projects/my-project/version?branch=main&ver
 5. Bump Version for a Branch
 ```bash
 curl -X POST "http://localhost:8000/projects/my-project/bump?branch=main&strategy=minor"
+```
+6. Unregister Project
+```bash
+curl -X DELETE "http://localhost:8000/projects/my-project"
+```
+6. Unregister Branch
+```bash
+curl -X DELETE "http://localhost:8000/projects/my-project?branch=main"
 ```
 ## Data Persistence
 
