@@ -96,6 +96,11 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 # ---- Routes ----
+@app.get("/")
+def home():
+    store = load_store()
+    return json.dumps(store)
+
 
 @app.post("/projects")
 def register_project(req: RegisterRequest):
