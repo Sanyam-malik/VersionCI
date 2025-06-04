@@ -16,11 +16,16 @@ declare -A components=(
     ["versionci"]="versionci.py"
 )
 
-echo "🛠 What do you want to install?"
-echo "1) vercli"
-echo "2) versionci"
-echo "3) Both"
-read -rp "Enter your choice [1-3]: " choice
+# Determine what to install (interactive or via argument)
+choice="${1:-}"
+
+if [[ -z "$choice" ]]; then
+    echo "🛠 What do you want to install?"
+    echo "1) vercli"
+    echo "2) versionci"
+    echo "3) Both"
+    read -rp "Enter your choice [1-3]: " choice
+fi
 
 case "$choice" in
     1) to_install=("vercli") ;;
@@ -39,7 +44,7 @@ echo "📦 Installing Python dependencies..."
 pip3 install --upgrade -r "$TMP_REQ"
 rm -f "$TMP_REQ"
 
-# Install selected tools
+# Install selected components
 for name in "${to_install[@]}"; do
     script_file="${components[$name]}"
     script_path="$INSTALL_BASE/$script_file"
@@ -58,7 +63,7 @@ EOF
 
     echo "✅ $name installed. 👉 Run with: $name"
 
-    # Special handling for versionci: create and enable systemd service
+    # Special handling for versionci: set up systemd service
     if [[ "$name" == "versionci" ]]; then
         echo "🛠 Setting up systemd service for versionci..."
 
