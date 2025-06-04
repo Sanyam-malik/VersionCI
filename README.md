@@ -33,8 +33,11 @@ docker-compose up --build
 ```
 or Use the install scripts
 ```bash
-curl -fsSL -u username:token \
-     http://forgejo.local/Neo/VersionCI/raw/branch/main/install.sh | sudo bash
+curl -fsSL -u sammy:token \
+    http://forgejo.local/Neo/VersionCI/raw/branch/main/install.sh -o install.sh
+
+chmod +x install.sh
+sudo ./install.sh
 ```
 
 ---
