@@ -21,7 +21,7 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Create the vercli script directly during build
 RUN cat << 'EOF' > /usr/local/bin/vercli && \
-    chmod +x /usr/local/bin/vercli
+chmod +x /usr/local/bin/vercli
 #!/bin/bash
 python3 /app/vercli.py "$@"
 EOF
