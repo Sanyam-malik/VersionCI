@@ -60,8 +60,6 @@ def get_version(ctx: typer.Context, project: str, branch: str):
         version = branches.get(branch)
         if version:
             typer.echo(version["version"])
-            if "commit" in version:
-                typer.echo(f"Commit: {version['commit']}")
         else:
             typer.echo("❌ Branch not found.", err=True)
             sys.exit(1)
