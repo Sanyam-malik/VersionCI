@@ -143,6 +143,16 @@ def bump(name: str, branch: str = Query(...), strategy: str = Query("patch")):
     logging.info(f"Bumped version for {name}/{branch} to {new_version}")
     return {"new_version": new_version}
 
+@app.delete("/projects/{name}")
+def unregister_project(name: str):
+    store = load_store()
+    if name not in store:
+        raise HTTPException(status_code=404, detail="Project not found")
+    del store[name]
+    save_store(store)
+    logging.info(f"Unregistered project: {name}")
+    return {"message": f"Project '{name}' unregistered"}
+
 # ---- Main Entry ----
 
 if __name__ == "__main__":
