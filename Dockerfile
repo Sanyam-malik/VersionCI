@@ -19,7 +19,9 @@ COPY . /app
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
-RUN mv vercli /usr/local/bin/
+# Create the vercli script directly during build
+RUN echo '#!/bin/bash\npython3 /app/vercli.py "$@"' > /usr/local/bin/vercli && \
+    chmod +x /usr/local/bin/vercli
 
 # Set the PYTHONPATH to include the shared directory
 ENV PYTHONPATH="/app:${PYTHONPATH}"
