@@ -144,14 +144,24 @@ def bump(name: str, branch: str = Query(...), strategy: str = Query("patch")):
     return {"new_version": new_version}
 
 @app.delete("/projects/{name}")
-def unregister_project(name: str):
+def unregister_project(name: str, branch: str = Query(None)):
     store = load_store()
     if name not in store:
         raise HTTPException(status_code=404, detail="Project not found")
-    del store[name]
-    save_store(store)
-    logging.info(f"Unregistered project: {name}")
-    return {"message": f"Project '{name}' unregistered"}
+
+    if branch:
+        branches = store[name].get("branches", {})
+        if branch not in branches:
+            raise HTTPException(status_code=404, detail="Branch not found")
+        del branches[branch]
+        save_store(store)
+        logging.info(f"Removed branch '{branch}' from project '{name}'")
+        return {"message": f"Branch '{branch}' removed from project '{name}'"}
+    else:
+        del store[name]
+        save_store(store)
+        logging.info(f"Unregistered project: {name}")
+        return {"message": f"Project '{name}' unregistered"}
 
 # ---- Main Entry ----
 
