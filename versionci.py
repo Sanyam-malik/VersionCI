@@ -96,11 +96,11 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 # ---- Routes ----
+
 @app.get("/")
 def home():
     store = load_store()
     return store
-
 
 @app.post("/projects")
 def register_project(req: RegisterRequest):
@@ -126,27 +126,48 @@ def get_versions(name: str):
     return store[name]["branches"]
 
 @app.patch("/projects/{name}/version")
-def set_version(name: str, branch: str = Query(...), version: str = Query(...)):
+def set_version(
+    name: str,
+    branch: str = Query(...),
+    version: str = Query(...),
+    commit: str = Query(None)
+):
     store = load_store()
     if name not in store:
         raise HTTPException(status_code=404, detail="Project not found")
-    store[name]["branches"][branch] = {"version": version}
+    
+    branch_data = {"version": version}
+    if commit:
+        branch_data["commit"] = commit
+
+    store[name]["branches"][branch] = branch_data
     save_store(store)
-    logging.info(f"Set version for {name}/{branch} to {version}")
-    return {"message": f"Version for branch {branch} set to {version}"}
+    logging.info(f"Set version for {name}/{branch} to {version} with commit {commit}")
+    return {"message": f"Version for branch {branch} set to {version}", "commit": commit}
 
 @app.post("/projects/{name}/bump")
-def bump(name: str, branch: str = Query(...), strategy: str = Query("patch")):
+def bump(
+    name: str,
+    branch: str = Query(...),
+    strategy: str = Query("patch"),
+    commit: str = Query(None)
+):
     store = load_store()
     if name not in store:
         raise HTTPException(status_code=404, detail="Project not found")
+    
     branches = store[name]["branches"]
     current = branches.get(branch, {}).get("version", "0.0.0")
     new_version = bump_version(current, strategy, ROLLOVER_THRESHOLD)
-    branches[branch] = {"version": new_version}
+    
+    branch_data = {"version": new_version}
+    if commit:
+        branch_data["commit"] = commit
+
+    branches[branch] = branch_data
     save_store(store)
-    logging.info(f"Bumped version for {name}/{branch} to {new_version}")
-    return {"new_version": new_version}
+    logging.info(f"Bumped version for {name}/{branch} to {new_version} with commit {commit}")
+    return {"new_version": new_version, "commit": commit}
 
 @app.delete("/projects/{name}")
 def unregister_project(name: str, branch: str = Query(None)):
