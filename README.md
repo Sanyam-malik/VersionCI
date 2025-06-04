@@ -31,6 +31,11 @@ It supports flexible versioning schemes with configurable rollover thresholds an
 ```bash
 docker-compose up --build
 ```
+or Use the install scripts
+```bash
+curl -fsSL http://forgejo.local/Neo/VersionCI/raw/branch/main/install_cli.sh | sudo bash
+curl -fsSL http://forgejo.local/Neo/VersionCI/raw/branch/main/install_server.sh | sudo bash
+```
 
 ---
 
