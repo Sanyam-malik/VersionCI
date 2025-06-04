@@ -62,5 +62,21 @@ def bump(ctx: typer.Context, project: str, branch: str, strategy: str = "patch")
         typer.echo(f"❌ Error: {resp.json().get('detail')}", err=True)
         sys.exit(1)
 
+@app.command()
+def remove(ctx: typer.Context, project: str, branch: str = typer.Option(None, help="Branch name to remove")):
+    """
+    Remove a project or a branch from a project.
+    """
+    base = get_api_base(ctx)
+    params = {}
+    if branch:
+        params["branch"] = branch
+    resp = requests.delete(f"{base}/projects/{project}", params=params)
+    if resp.status_code == 200:
+        typer.echo(f"✅ {resp.json().get('message')}")
+    else:
+        typer.echo(f"❌ Error: {resp.json().get('detail')}", err=True)
+        sys.exit(1)
+
 if __name__ == "__main__":
     app()
