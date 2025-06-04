@@ -99,7 +99,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 @app.get("/")
 def home():
     store = load_store()
-    return json.dumps(store)
+    return store
 
 
 @app.post("/projects")
