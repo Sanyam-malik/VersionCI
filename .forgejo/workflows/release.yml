@@ -30,14 +30,7 @@ jobs:
 
       - name: Get Commit Hash
         id: get_commit
-        run: echo "commit_hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Mirror All Branches and Tags to GitHub
-        env:
-          GITHUB_MIRROR_URL: ${{ secrets.GIT_MIRROR }}
-        run: |
-          git remote add github "$GITHUB_MIRROR_URL"
-          git push --mirror github          
+        run: echo "commit_hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT     
 
       - name: Install VersionCI
         env:
