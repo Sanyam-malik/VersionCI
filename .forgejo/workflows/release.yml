@@ -76,7 +76,16 @@ jobs:
       - name: Build Docker Image
         run: |
           docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest \
-                       -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${{ needs.version-bump.outputs.new_tag }} .
+                       -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${{ needs.version-bump.outputs.new_tag }} .                    
+
+      - name: Push Docker Images
+        run: |
+          docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest
+          docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${{ needs.version-bump.outputs.new_tag }}                    
+
+      - name: Pull Image to Verify
+        run: |
+          docker pull ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${{ needs.version-bump.outputs.new_tag }}
 
       - name: Trivy Scan (Security)
         run: |
@@ -88,15 +97,6 @@ jobs:
           trivy image --no-progress --exit-code 1 --format json \
             ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${{ needs.version-bump.outputs.new_tag }} || \
             echo "Trivy scan found vulnerabilities. Review above results."
-
-      - name: Push Docker Images
-        run: |
-          docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest
-          docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${{ needs.version-bump.outputs.new_tag }}
-
-      - name: Pull Image to Verify
-        run: |
-          docker pull ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${{ needs.version-bump.outputs.new_tag }}
 
       - name: Cleanup Docker
         if: always()
