@@ -14,8 +14,8 @@ jobs:
     name: Bump Version and Tag
     runs-on: neo-ubuntu
     outputs:
-    new_tag: ${{ steps.bump.outputs.new_tag }}
-    commit_hash: ${{ steps.get_commit.outputs.commit_hash }}
+      new_tag: ${{ steps.bump.outputs.new_tag }}
+      commit_hash: ${{ steps.get_commit.outputs.commit_hash }}
 
     steps:
       - name: Setup DNS
