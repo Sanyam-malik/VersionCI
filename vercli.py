@@ -12,7 +12,7 @@ def get_host(ctx: typer.Context):
     return ctx.obj.get("host") or os.getenv("VERSIONCI_API_BASE") or DEFAULT_HOST
 
 @app.callback()
-def main(ctx: typer.Context, host: str = typer.Option(None, help="Base URL of VerCI API")):
+def main(ctx: typer.Context, host: str = typer.Option(DEFAULT_HOST, help="Base URL of VerCI API")):
     ctx.obj = {"host": host}
 
 @app.command(name="list")
