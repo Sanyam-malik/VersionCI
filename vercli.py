@@ -43,6 +43,9 @@ def list_projects(ctx: typer.Context):
 
 @app.command()
 def register(ctx: typer.Context, name: str, repo: str):
+    """
+    Register git projects.
+    """
     host = get_host(ctx)
     resp = requests.post(f"{host}/projects", json={"name": name, "repo": repo})
     if resp.status_code == 200:
@@ -53,6 +56,9 @@ def register(ctx: typer.Context, name: str, repo: str):
 
 @app.command()
 def get_version(ctx: typer.Context, project: str, branch: str):
+    """
+    Fetch current version of project.
+    """
     host = get_host(ctx)
     resp = requests.get(f"{host}/projects/{project}/versions")
     if resp.status_code == 200:
@@ -75,6 +81,9 @@ def set_version(
     version: str,
     commit: str = typer.Option(None, help="Optional commit hash to associate with this version"),
 ):
+    """
+    Set version of project.
+    """
     host = get_host(ctx)
     params = {"branch": branch, "version": version}
     if commit:
@@ -90,6 +99,9 @@ def bump(
     strategy: str = "patch",
     commit: str = typer.Option(None, help="Optional commit hash to associate with the bumped version"),
 ):
+    """
+    Bump version of project.
+    """
     host = get_host(ctx)
     params = {"branch": branch, "strategy": strategy}
     if commit:
