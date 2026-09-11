@@ -1,0 +1,102 @@
+name: Build Docker Image
+
+on:
+  workflow_dispatch:
+
+env:
+  DOCKER_REGISTRY: sanyammalik
+  DOCKER_IMAGE: version-cli
+
+jobs:
+  version-bump:
+    name: Bump Version and Tag
+    runs-on: ownubuntu
+    outputs:
+      new_tag: ${{ steps.bump.outputs.new_tag }}
+      commit_hash: ${{ steps.get_commit.outputs.commit_hash }}
+
+    steps:
+      - name: Setup DNS
+        run: |
+          echo "nameserver 10.60.1.2" > /etc/resolv.conf
+          echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get Commit Hash
+        id: get_commit
+        run: echo "commit_hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT     
+
+      - name: Install VersionCI
+        env:
+          GIT_USER: ${{ vars.FORGEJO_USER }}
+          GIT_PASS: ${{ secrets.FORGEJO_TOKEN }}
+        run: |
+          curl -fsSL -u $GIT_USER:$GIT_PASS \
+            http://forgejo.local/Neo/VersionCI/raw/branch/main/install.sh -o install.sh
+          chmod +x install.sh
+          sudo GIT_USER="$GIT_USER" GIT_PASS="$GIT_PASS" ./install.sh 1                              
+
+      - name: Bump Version using VersionCI
+        id: bump
+        run: |
+          vercli --host http://versionci.local:8000 bump versionci release --strategy increment --commit ${{ steps.get_commit.outputs.commit_hash }}
+          NEW_VERSION=$(vercli --host http://versionci.local:8000 get-version versionci release)
+          echo "new_tag=v$NEW_VERSION" >> $GITHUB_OUTPUT 
+
+      - name: Mirror All Branches and Tags to GitHub
+        env:
+          GITHUB_MIRROR_URL: ${{ secrets.GIT_MIRROR }}
+        run: |
+          git remote add github "$GITHUB_MIRROR_URL"
+          git push --mirror github
+
+  docker-build:
+    name: Build and Push Docker Image
+    runs-on: ownubuntu
+    needs: version-bump
+
+    steps:
+      - name: Setup DNS
+        run: |
+          echo "nameserver 10.60.1.2" > /etc/resolv.conf
+          echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build Docker Image
+        run: |
+          docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest \
+                       -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${{ needs.version-bump.outputs.new_tag }} .                    
+
+      - name: Push Docker Images
+        run: |
+          docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest
+          docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${{ needs.version-bump.outputs.new_tag }}                    
+
+      - name: Pull Image to Verify
+        run: |
+          docker pull ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${{ needs.version-bump.outputs.new_tag }}
+
+      - name: Trivy Scan (Security)
+        run: |
+          if ! command -v trivy >/dev/null; then
+            echo "Installing Trivy..."
+            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          fi
+
+          trivy image --no-progress --exit-code 1 --format json \
+            ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${{ needs.version-bump.outputs.new_tag }} || \
+            echo "Trivy scan found vulnerabilities. Review above results."
+
+      - name: Cleanup Docker
+        if: always()
+        run: |
+          docker system prune -af || true

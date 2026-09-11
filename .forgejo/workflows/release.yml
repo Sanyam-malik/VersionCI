@@ -1,0 +1,33 @@
+name: Sync VersionCI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sync-vercli:
+    name: Sync VersionCI Repository & Container Image
+    runs-on: ubuntu
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push clean history to target repo
+        uses: actions/forgejo/repository-sync@v1
+        with:
+          remote_url: https://github.com/Sanyam-malik/VersionCI.git
+          token: ${{ vars.GIT_TOKEN }}
+          user_name: Sanyam-malik
+          user_email: sanyammalik105@gmail.com
+
+      - name: Push docker image to docker hub
+        uses: actions/forgejo/docker-sync@v1
+        with:
+          token: ${{ vars.GLOBAL_TOKEN }}
+          docker_registry: docker.io
+          docker_registry_namespace: sanyammalik
+          docker_registry_image: version-cli
+          docker_registry_username: sanyammalik
+          docker_registry_token: ${{ vars.DOCKER_TOKEN }}
